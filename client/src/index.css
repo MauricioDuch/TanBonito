@@ -1,0 +1,231 @@
+/* Paleta de la marca Tan Bonito */
+:root {
+  --brand-primary: #600713;       /* bordó: menú, botones */
+  --brand-primary-dark: #3d150e;  /* marrón chocolate: hover, títulos */
+  --brand-accent: #ffd2e7;        /* rosa: foco, detalles */
+  --brand-soft: #fbe5d7;          /* crema: encabezados de tabla, fondos suaves */
+
+  --bg: #fdf5ef;
+  --surface: #ffffff;
+  --text: #3d150e;
+  --muted: #8a6f68;
+  --border: #f0dccf;
+  --danger: #c0392b;
+  --ok: #3c8d5a;
+  --radius: 12px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+h1 { font-size: 1.5rem; margin: 0 0 1rem; }
+h2 { font-size: 1.15rem; margin: 1.5rem 0 .75rem; }
+
+/* Layout: barra lateral en tablet horizontal / desktop, barra superior en pantallas chicas */
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 220px; flex-shrink: 0; background: var(--brand-primary); color: #fff;
+  display: flex; flex-direction: column; padding: 1.25rem .75rem;
+  /* Fijo al hacer scroll: siempre ocupa el alto de la pantalla */
+  position: sticky; top: 0; height: 100vh; height: 100dvh; overflow-y: auto; z-index: 5;
+}
+.sidebar .logo { padding: .25rem .75rem 1.5rem; }
+/* El logo es negro sobre transparente: en la barra se pasa a blanco */
+.sidebar .logo img { display: block; width: 100%; max-width: 180px; height: auto; filter: brightness(0) invert(1); }
+.sidebar nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.sidebar a, .sidebar button.link {
+  color: #fff; text-decoration: none; padding: .75rem; border-radius: 8px; font-size: 1rem;
+  background: none; border: 0; text-align: left; cursor: pointer; font: inherit;
+}
+.sidebar a:hover, .sidebar button.link:hover { background: rgba(255, 255, 255, .14); }
+.sidebar a.active { background: var(--brand-accent); color: var(--brand-primary); font-weight: 600; }
+.content { flex: 1; padding: 1.5rem; min-width: 0; }
+
+.burger, .menu-backdrop { display: none; }
+
+@media (max-width: 1023px) {
+  .layout { flex-direction: column; }
+  /* Barra superior con el logo y el botón; las pestañas se despliegan debajo */
+  .sidebar { width: auto; height: auto; flex-direction: row; align-items: center; justify-content: space-between; padding: .5rem; overflow: visible; }
+  .sidebar .logo { padding: 0 .5rem; flex-shrink: 0; }
+  .sidebar .logo img { width: auto; height: 24px; max-width: none; }
+  .burger { display: inline-flex; align-items: center; justify-content: center; width: 44px; padding: 0; border: 0; background: transparent; color: #fff; }
+  .burger:hover { background: rgba(255, 255, 255, .14); }
+  .sidebar nav {
+    display: none; position: absolute; top: 100%; left: 0; right: 0; padding: .5rem;
+    background: var(--brand-primary); box-shadow: 0 8px 16px rgba(61, 21, 14, .3);
+    /* Si las pestañas no entran en pantallas bajas, el menú hace scroll */
+    max-height: calc(100dvh - 60px); overflow-y: auto;
+  }
+  .sidebar nav.open { display: flex; }
+  .sidebar a, .sidebar button.link { padding: .8rem .75rem; width: 100%; }
+  .menu-backdrop { display: block; position: fixed; inset: 0; z-index: 4; background: rgba(61, 21, 14, .35); }
+  .content { padding: 1rem; }
+}
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.stat .label { color: var(--muted); font-size: .9rem; }
+.stat .value { font-size: 1.6rem; font-weight: 700; margin-top: .25rem; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; margin-bottom: 1rem; }
+.toolbar .spacer { flex: 1; }
+
+label { display: flex; flex-direction: column; gap: .3rem; font-size: .85rem; color: var(--muted); }
+input, select {
+  font: inherit; font-size: 1rem; color: var(--text); padding: .6rem .7rem; min-height: 44px;
+  border: 1px solid var(--border); border-radius: 8px; background: #fff; min-width: 0;
+}
+input:focus, select:focus { outline: 2px solid var(--brand-primary); outline-offset: 1px; box-shadow: 0 0 0 4px var(--brand-accent); border-color: transparent; }
+input[type='checkbox'] { min-height: auto; width: 22px; height: 22px; }
+
+button {
+  font: inherit; font-size: 1rem; min-height: 44px; padding: .55rem 1.1rem; border-radius: 8px;
+  border: 1px solid var(--brand-primary); background: var(--brand-primary); color: #fff; cursor: pointer;
+}
+button:hover { background: var(--brand-primary-dark); }
+button:disabled { opacity: .55; cursor: default; }
+button.secondary { background: #fff; color: var(--brand-primary-dark); }
+button.secondary:hover { background: var(--brand-soft); }
+button.danger { background: #fff; color: var(--danger); border-color: var(--border); }
+button.small { min-height: 36px; padding: .3rem .7rem; font-size: .9rem; }
+
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: .65rem .75rem; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+th { font-size: .8rem; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); background: var(--brand-soft); }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; }
+td.actions { text-align: right; }
+td.actions > * { margin-left: .4rem; }
+td input, td select { width: 100%; min-width: 90px; }
+
+button.danger:not(:disabled):hover { background: #fdecea; }
+button.icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; min-height: 40px; padding: 0; vertical-align: middle; }
+button.icon:disabled:hover { background: #fff; }
+
+/* Solapas Velas / Aromas */
+.tabs { display: flex; gap: .25rem; margin-bottom: 1rem; border-bottom: 2px solid var(--border); }
+button.tab {
+  background: transparent; color: var(--muted); border: 0; border-bottom: 3px solid transparent;
+  border-radius: 8px 8px 0 0; margin-bottom: -2px; font-weight: 600;
+}
+button.tab:hover { background: var(--brand-soft); }
+button.tab.active { color: var(--brand-primary); border-bottom-color: var(--brand-primary); }
+.tab-count { font-size: .8rem; font-weight: 400; padding: .05rem .45rem; border-radius: 999px; background: var(--brand-soft); color: var(--brand-primary-dark); }
+
+/* Recetas: la tarjeta nunca es más angosta que su contenido, y el contenido nunca se sale de la tarjeta */
+.recipes-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.recipe-card { min-width: 0; }
+.recipe-head { display: flex; align-items: flex-start; gap: .5rem; margin-bottom: .5rem; }
+.recipe-head h2 { flex: 1; min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.recipe-actions { display: flex; gap: .35rem; flex-shrink: 0; }
+.recipe-card th, .recipe-card td { padding: .5rem .4rem; white-space: normal; overflow-wrap: anywhere; }
+.recipe-card td.num { white-space: nowrap; overflow-wrap: normal; }
+
+/* Tablet: todo entra sin barra de desplazamiento. Las tablas se achican y los textos pueden partirse. */
+@media (min-width: 600px) and (max-width: 1280px) {
+  th, td { padding: .5rem .4rem; white-space: normal; font-size: .88rem; }
+  th { font-size: .72rem; letter-spacing: 0; }
+  td.num, th.num { white-space: nowrap; }
+  td input, td select { min-width: 0; padding: .45rem .4rem; font-size: .88rem; }
+  td.actions { white-space: normal; }
+  td.actions > * { margin: .15rem 0 .15rem .3rem; }
+  button.small { padding: .25rem .5rem; font-size: .82rem; }
+
+  /* Carga de ventas: columnas con ancho fijo, para que los desplegables no empujen la tabla */
+  .sale-lines { table-layout: fixed; }
+  .sale-lines th:nth-child(1) { width: 25%; }
+  .sale-lines th:nth-child(2) { width: 18%; }
+  .sale-lines th:nth-child(3) { width: 10%; }
+  .sale-lines th:nth-child(4) { width: 12%; }
+  .sale-lines th:nth-child(5) { width: 15%; }
+  .sale-lines th:nth-child(6) { width: 13%; }
+  .sale-lines th:nth-child(7) { width: 48px; }
+  .sale-lines td.actions { padding-left: 0; }
+  .sale-lines td.num { white-space: normal; overflow-wrap: anywhere; }
+
+  .recipes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 768px) {
+  td.date { white-space: nowrap; }
+}
+
+/* Tablets chicas: más compacto, y hasta los importes pueden partirse */
+@media (min-width: 600px) and (max-width: 767px) {
+  th, td { padding: .4rem .3rem; font-size: .82rem; overflow-wrap: anywhere; }
+  td.num, th.num { white-space: normal; }
+}
+tfoot td { font-weight: 700; }
+
+.badge { display: inline-block; padding: .15rem .55rem; border-radius: 999px; font-size: .8rem; background: var(--brand-soft); color: var(--brand-primary-dark); }
+.badge.warn { background: #fdf0d8; color: #9a6a12; margin-left: .4rem; }
+.muted { color: var(--muted); }
+.negative { color: var(--danger); }
+tr.row-missing td { background: #fdecea; }
+.alert { margin-top: 1rem; padding: .75rem 1rem; border-radius: 8px; background: #fdecea; color: #7f2a20; border: 1px solid #f5c6c0; }
+.alert ul { margin: .5rem 0; padding-left: 1.25rem; }
+.alert a { color: inherit; font-weight: 600; }
+
+.stock-section header { display: flex; align-items: baseline; gap: .75rem; margin-bottom: .5rem; padding-bottom: .5rem; border-bottom: 2px solid var(--brand-soft); }
+.stock-section h3 { margin: 0; font-size: 1.05rem; flex: 1; }
+.stock-section .stock-total { font-size: 1.3rem; font-weight: 700; color: var(--brand-primary-dark); }
+.stock-section .stock-total.negative { color: var(--danger); }
+.stock-section td { border-bottom: 1px solid var(--border); padding: .45rem .25rem; }
+.inline-edit { display: inline-flex; gap: .3rem; align-items: center; }
+.inline-edit input { width: 90px; min-width: 0; min-height: 36px; padding: .3rem .5rem; }
+details summary { cursor: pointer; font-weight: 600; color: var(--brand-primary-dark); }
+.error { color: var(--danger); margin: .5rem 0; }
+.success { color: var(--ok); margin: .5rem 0; }
+
+.form-grid { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); align-items: end; }
+
+/* Gráficos de torta (dona) */
+/* Siempre 2 columnas (2 filas de 2); en celular, una sola */
+.pie-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 600px) { .pie-grid { grid-template-columns: 1fr; } }
+.pie-body { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.pie { width: 170px; height: 170px; flex-shrink: 0; }
+.pie path { stroke: var(--surface); stroke-width: 2px; stroke-linejoin: round; cursor: pointer; transition: opacity .15s; }
+.pie path.pie-dim { opacity: .35; }
+.pie-center-value { font-size: 17px; font-weight: 700; fill: var(--text); }
+.pie-center-label { font-size: 11px; fill: var(--muted); }
+.pie-legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 170px; display: flex; flex-direction: column; gap: .15rem; }
+.pie-legend li { display: grid; grid-template-columns: 12px 1fr auto auto; gap: .5rem; align-items: center; padding: .3rem .4rem; border-radius: 6px; font-size: .92rem; }
+.pie-legend li.active { background: var(--brand-soft); }
+.pie-legend .swatch { width: 12px; height: 12px; border-radius: 3px; }
+.pie-legend .value { font-weight: 600; text-align: right; }
+.pie-legend .pct { color: var(--muted); min-width: 3.2em; text-align: right; font-size: .85rem; }
+
+/* Ventas por mes (columnas) */
+.monthly-card { margin-top: 1rem; }
+.monthly-summary { margin: 0 0 .5rem; font-size: 1.05rem; }
+.monthly-chart { width: 100%; height: auto; display: block; }
+.monthly-chart .grid { stroke: var(--border); stroke-width: 1; }
+.monthly-chart .axis { stroke: #cdb5a8; stroke-width: 1; }
+.monthly-chart .tick { font-size: 12px; fill: var(--muted); }
+.monthly-chart .tick-best { fill: var(--brand-primary); font-weight: 700; }
+.monthly-chart .bar-mark { fill: #c99aa1; transition: fill .15s; cursor: pointer; }
+.monthly-chart .bar-mark.hover { fill: #a35a66; }
+.monthly-chart .bar-mark.best { fill: var(--brand-primary); }
+.monthly-chart .bar-label { font-size: 12px; font-weight: 700; fill: var(--text); }
+.segmented { display: inline-flex; border: 1px solid var(--brand-primary); border-radius: 8px; overflow: hidden; }
+.segmented button { border: 0; border-radius: 0; background: #fff; color: var(--brand-primary); min-height: 36px; padding: .3rem .9rem; font-size: .9rem; }
+.segmented button.on { background: var(--brand-primary); color: #fff; }
+.segmented button:not(.on):hover { background: var(--brand-soft); }
+
+.bars { display: flex; flex-direction: column; gap: .5rem; }
+.bar-row { display: grid; grid-template-columns: minmax(90px, 1fr) 3fr auto; gap: .6rem; align-items: center; font-size: .95rem; }
+.bar { height: 14px; background: var(--brand-soft); border-radius: 7px; overflow: hidden; }
+.bar > div { height: 100%; background: var(--brand-primary); border-radius: 7px; }
+
+.login { min-height: 100vh; display: grid; place-items: center; padding: 1rem; background: var(--brand-soft); }
+.login form { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 1rem; }
+.login h1 { margin: .5rem 0 .75rem; display: flex; justify-content: center; }
+.login-logo { width: 100%; max-width: 260px; height: auto; }
+
+.modal-backdrop { position: fixed; inset: 0; background: rgba(61, 44, 46, .35); display: grid; place-items: center; padding: 1rem; z-index: 10; }
+.modal { width: 100%; max-width: 760px; max-height: 92vh; overflow-y: auto; }
