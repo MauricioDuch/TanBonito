@@ -1,22 +1,22 @@
 # Desarrollo: docker compose up
 #   App (Vite, recarga en vivo)  http://localhost:5173
 #   API                          http://localhost:8080/api/health
-#   MySQL (desde Workbench)      localhost:3307  usuario tanbonito / tanbonito
+#   MySQL (desde Workbench)      localhost:3307  usuario tanbonito / 0000 (root / 0000)
 services:
   db:
     image: mysql:8.4
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: "0000"
       MYSQL_DATABASE: tan_bonito
       MYSQL_USER: tanbonito
-      MYSQL_PASSWORD: tanbonito
+      MYSQL_PASSWORD: "0000"
       TZ: America/Argentina/Buenos_Aires
     ports:
       - "3307:3306"   # 3307 para no chocar con el MySQL local
     volumes:
       - db-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p0000"]
       interval: 5s
       retries: 20
 
@@ -27,11 +27,11 @@ services:
     environment:
       DB_HOST: db
       DB_USER: tanbonito
-      DB_PASSWORD: tanbonito
+      DB_PASSWORD: "0000"
       DB_NAME: tan_bonito
       SESSION_SECRET: dev-secret
       ADMIN_USER: jennifer
-      ADMIN_PASSWORD: tanbonito
+      ADMIN_PASSWORD: "0000"
       CHOKIDAR_USEPOLLING: "true"
       TZ: America/Argentina/Buenos_Aires
     ports:

@@ -55,7 +55,7 @@ Diferencias con nabi-barber: contraseñas con hash (`bcryptjs`), rutas REST (`/a
 - **Excel actual** con todas las pestañas → validar campos y fórmulas de costeo antes de cargar datos reales.
 
 ## Checklist para pasar a producción
-- [ ] **No reutilizar las credenciales de desarrollo** (`tanbonito`/`tanbonito`, `root`/`root`, login `jennifer`/`tanbonito`).
+- [ ] **No reutilizar las credenciales de desarrollo** (base `tanbonito`/`0000`, `root`/`0000`, login `jennifer`/`0000`).
 - [ ] Crear `.env` en el servidor desde `.env.example` con `DB_ROOT_PASSWORD`, `DB_PASSWORD`, `SESSION_SECRET` y `ADMIN_PASSWORD` nuevos, largos y generados.
 - [ ] Contraseña de Jennifer distinta a la de desarrollo (se crea al primer arranque desde `ADMIN_USER`/`ADMIN_PASSWORD`).
 - [ ] HTTPS con Caddy delante y `COOKIE_SECURE=true`; MySQL sin puerto expuesto (ya es así en `docker-compose.prod.yml`).

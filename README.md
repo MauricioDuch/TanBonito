@@ -90,9 +90,9 @@ docker compose up
 
 | | |
 |---|---|
-| App | http://localhost:5173 (usuario de desarrollo: `jennifer` / `tanbonito`) |
+| App | http://localhost:5173 (usuario de desarrollo: `jennifer` / `0000`) |
 | API | http://localhost:8080/api/health |
-| MySQL | `localhost:3307`, usuario `tanbonito` / `tanbonito` |
+| MySQL | `localhost:3307`, usuario `tanbonito` / `0000` (root: `0000`) |
 
 El código se monta en los contenedores y se recarga solo al guardar. Para empezar con la base vacía: `docker compose down -v`.
 
