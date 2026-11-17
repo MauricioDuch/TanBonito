@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { PoolConnection } from 'mysql2/promise';
 import { db, query } from '../config/db.js';
 import { inTransaction, moveProductStock, moveSupplyStock } from '../config/stock.js';
 import { asyncHandler, missing } from '../middleware/middleware.js';
@@ -19,6 +20,13 @@ export const withCosts = async (products: any[]) => {
      WHERE ri.product_id IN (?) ORDER BY s.name`,
     [ids]
   );
+  const packagingItems = await query<any[]>(
+    `SELECT pp.product_id, pp.packaging_id, pp.quantity, pk.name AS packaging_name,
+            pk.package_price / pk.package_qty AS unit_price
+     FROM product_packaging pp JOIN packaging pk ON pk.id = pp.packaging_id
+     WHERE pp.product_id IN (?) ORDER BY pk.name`,
+    [ids]
+  );
   const stock = await query<any[]>(
     'SELECT product_id, SUM(quantity) AS stock FROM product_stock WHERE product_id IN (?) GROUP BY product_id',
     [ids]
@@ -32,10 +40,16 @@ export const withCosts = async (products: any[]) => {
       .filter((i) => i.product_id === p.id)
       .map((i) => ({ ...i, unit_price: round(i.unit_price), cost: round(i.quantity * i.unit_price) }));
     const supplies_cost = round(recipe.reduce((sum, i) => sum + i.cost, 0));
-    const total_cost = round(supplies_cost + p.labor_cost + p.packaging_cost + fixedPerUnit);
+    const packaging = packagingItems
+      .filter((i) => i.product_id === p.id)
+      .map((i) => ({ ...i, quantity: Number(i.quantity), unit_price: round(i.unit_price), cost: round(i.quantity * i.unit_price) }));
+    const packaging_cost = round(packaging.reduce((sum, i) => sum + i.cost, 0));
+    const total_cost = round(supplies_cost + p.labor_cost + packaging_cost + fixedPerUnit);
     return {
       ...p,
       recipe,
+      packaging,
+      packaging_cost,
       stock: Number(stock.find((s) => s.product_id === p.id)?.stock ?? 0),
       supplies_cost,
       fixed_cost: round(fixedPerUnit),
@@ -70,24 +84,53 @@ router.get('/:id', asyncHandler(async (req, res) => {
 }));
 
 const values = (b: any) => [
-  b.name, b.category === 'aroma' ? 'aroma' : 'vela', b.labor_cost ?? 0, b.packaging_cost ?? 0, b.sale_price ?? 0, b.active ?? 1
+  b.name, b.category === 'aroma' ? 'aroma' : 'vela', b.labor_cost ?? 0, b.sale_price ?? 0, b.active ?? 1
 ];
+
+// packaging: [{ packaging_id, quantity }]. Si viene, reemplaza todo el packaging del producto.
+const packagingRows = (b: any): { rows: number[][] } | { error: string } | null => {
+  if (b.packaging === undefined) return null;
+  if (!Array.isArray(b.packaging)) return { error: 'Packaging inválido' };
+  const rows = b.packaging
+    .filter((i: any) => i.packaging_id && Number(i.quantity) > 0)
+    .map((i: any) => [Number(i.packaging_id), Number(i.quantity)]);
+  if (new Set(rows.map((r: number[]) => r[0])).size !== rows.length) return { error: 'Hay un packaging repetido' };
+  return { rows };
+};
+
+const savePackaging = async (conn: PoolConnection, productId: number, rows: number[][]) => {
+  await conn.query('DELETE FROM product_packaging WHERE product_id = ?', [productId]);
+  if (rows.length) {
+    await conn.query('INSERT INTO product_packaging (product_id, packaging_id, quantity) VALUES ?', [rows.map((r) => [productId, ...r])]);
+  }
+};
 
 router.post('/', asyncHandler(async (req, res) => {
   if (missing(req.body, ['name'])) return res.status(400).json({ error: 'Falta el nombre' });
-  const result: any = await query(
-    'INSERT INTO products (name, category, labor_cost, packaging_cost, sale_price, active) VALUES (?, ?, ?, ?, ?, ?)',
-    values(req.body)
-  );
-  res.status(201).json(await getProduct(result.insertId));
+  const pack = packagingRows(req.body);
+  if (pack && 'error' in pack) return res.status(400).json({ error: pack.error });
+  const id = await inTransaction(db, async (conn) => {
+    const [result]: any = await conn.query(
+      'INSERT INTO products (name, category, labor_cost, sale_price, active) VALUES (?, ?, ?, ?, ?)',
+      values(req.body)
+    );
+    if (pack) await savePackaging(conn, result.insertId, pack.rows);
+    return result.insertId;
+  });
+  res.status(201).json(await getProduct(id));
 }));
 
 router.put('/:id', asyncHandler(async (req, res) => {
   if (missing(req.body, ['name'])) return res.status(400).json({ error: 'Falta el nombre' });
-  await query(
-    'UPDATE products SET name = ?, category = ?, labor_cost = ?, packaging_cost = ?, sale_price = ?, active = ? WHERE id = ?',
-    [...values(req.body), req.params.id]
-  );
+  const pack = packagingRows(req.body);
+  if (pack && 'error' in pack) return res.status(400).json({ error: pack.error });
+  await inTransaction(db, async (conn) => {
+    await conn.query(
+      'UPDATE products SET name = ?, category = ?, labor_cost = ?, sale_price = ?, active = ? WHERE id = ?',
+      [...values(req.body), req.params.id]
+    );
+    if (pack) await savePackaging(conn, Number(req.params.id), pack.rows);
+  });
   const product = await getProduct(String(req.params.id));
   if (!product) return res.status(404).json({ error: 'No encontrado' });
   res.json(product);

@@ -21,6 +21,7 @@ const { default: statsRoutes } = await import('./routes/stats.js');
 const { default: settingsRoutes } = await import('./routes/settings.js');
 const { default: recipesRoutes } = await import('./routes/recipes.js');
 const { default: stockRoutes } = await import('./routes/stock.js');
+const { default: packagingRoutes } = await import('./routes/packaging.js');
 
 const PORT = Number(process.env.PORT) || 8080;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -67,6 +68,7 @@ api.use('/stats', statsRoutes);
 api.use('/settings', settingsRoutes);
 api.use('/recipes', recipesRoutes);
 api.use('/stock', stockRoutes);
+api.use('/packaging', packagingRoutes);
 api.use((req, res) => { res.status(404).json({ error: 'Ruta inexistente' }); });
 app.use('/api', api);
 

@@ -30,6 +30,7 @@ El negocio llevaba todo en un Excel: cuánto cuesta cada insumo, qué lleva cada
 | Módulo | Qué resuelve |
 |---|---|
 | **Insumos y compras** | El precio unitario se calcula solo a partir del envase ($/g de cera, $/ml de esencia). Registrar una compra suma al stock y puede actualizar el precio del insumo. |
+| **Packaging** | Catálogo propio de cajas, bolsas, moños y etiquetas con su costo por unidad. Cada producto elige qué lleva y en qué cantidad, así cada uno tiene su costo de packaging. |
 | **Recetas** | Cada producto lleva insumos + cantidades. Separadas en **velas** y **aromas**; los insumos se comparten entre ambas. |
 | **Costeo y precios** | Costo por unidad = insumos + mano de obra + packaging + gastos fijos prorrateados. Precio sugerido según margen configurable. Si sube un insumo, se recalculan todos los productos que lo usan. |
 | **Fabricación** | "Crear 10 velas" aplica la receta, descuenta los insumos y suma el producto al stock. Si falta algo, avisa exactamente qué y cuánto. Se puede deshacer. |

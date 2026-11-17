@@ -13,6 +13,7 @@ import Settings from './pages/Settings';
 import Recipes from './pages/Recipes';
 import Stock from './pages/Stock';
 import SimpleCrud from './components/SimpleCrud';
+import PackagingPage from './pages/PackagingPage';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -24,6 +25,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="ventas" element={<Sales />} />
           <Route path="compras" element={<Purchases />} />
           <Route path="insumos" element={<Supplies />} />
+          <Route path="packaging" element={<PackagingPage />} />
           <Route path="productos" element={<Products />} />
           <Route path="recetas" element={<Recipes />} />
           <Route path="stock" element={<Stock />} />

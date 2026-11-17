@@ -57,10 +57,16 @@ export interface Supply {
 export interface RecipeLine {
   supply_id: number; quantity: number; supply_name: string; unit: string; unit_price: number; cost: number; stock: number;
 }
+export interface Packaging {
+  id: number; name: string; package_qty: number; package_price: number; unit_price: number; used_in: string | null;
+}
+export interface PackagingLine {
+  packaging_id: number; packaging_name: string; quantity: number; unit_price: number; cost: number;
+}
 export type Category = 'vela' | 'aroma';
 export interface Product {
   id: number; name: string; category: Category; labor_cost: number; packaging_cost: number; sale_price: number; active: number;
-  recipe: RecipeLine[]; stock: number; supplies_cost: number; fixed_cost: number; total_cost: number;
+  recipe: RecipeLine[]; packaging: PackagingLine[]; stock: number; supplies_cost: number; fixed_cost: number; total_cost: number;
   suggested_price: number; margin: number | null;
 }
 export interface Production {

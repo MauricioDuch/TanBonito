@@ -9,6 +9,7 @@ const LINKS = [
   { to: '/productos', label: 'Productos' },
   { to: '/recetas', label: 'Recetas' },
   { to: '/insumos', label: 'Insumos' },
+  { to: '/packaging', label: 'Packaging' },
   { to: '/compras', label: 'Compras' },
   { to: '/aromas', label: 'Aromas' },
   { to: '/proveedores', label: 'Proveedores' },

@@ -229,3 +229,8 @@ details summary { cursor: pointer; font-weight: 600; color: var(--brand-primary-
 
 .modal-backdrop { position: fixed; inset: 0; background: rgba(61, 44, 46, .35); display: grid; place-items: center; padding: 1rem; z-index: 10; }
 .modal { width: 100%; max-width: 760px; max-height: 92vh; overflow-y: auto; }
+.modal-subtitle { margin: 1.25rem 0 .5rem; font-size: 1rem; }
+.pack-lines { table-layout: fixed; }
+.pack-lines th:nth-child(1) { width: 52%; }
+.pack-lines th:nth-child(2) { width: 18%; }
+.pack-lines th:nth-child(4) { width: 90px; }

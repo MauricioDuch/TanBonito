@@ -33,6 +33,7 @@ Diferencias con nabi-barber: contraseñas con hash (`bcryptjs`), rutas REST (`/a
 - [x] **Stock** de productos terminados por aroma (secciones por producto) e insumos. Ventas descuentan, compras suman.
       El stock nunca queda negativo: no se puede vender más de lo que hay (validado en servidor y base de datos).
 - [x] **Velas y aromas** separados en Productos y Recetas (comparten insumos).
+- [x] **Packaging** como apartado propio: artículos con costo por unidad (precio del pack / unidades) y cada producto elige cuáles lleva.
 - [x] **Estadísticas por rango de fechas**: ingresos, unidades, top productos, top aromas, desglose por canal y medio de pago.
 
 ### Fase 2 — Clientes y retención

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, ApiError, Category, money, Product, Production, qty, Scent, Shortage } from '../api';
+import { api, ApiError, Category, money, Packaging, Product, Production, qty, Scent, Shortage } from '../api';
 import CategoryTabs, { CATEGORY_LABELS, useCategory } from '../components/CategoryTabs';
 
 interface Draft {
@@ -8,19 +8,19 @@ interface Draft {
   name: string;
   category: Category;
   labor_cost: string;
-  packaging_cost: string;
+  packaging: { packaging_id: string; quantity: string }[];
   sale_price: string;
   active: number;
 }
 
-const emptyDraft = (category: Category): Draft => ({ name: '', category, labor_cost: '', packaging_cost: '', sale_price: '', active: 1 });
+const emptyDraft = (category: Category): Draft => ({ name: '', category, labor_cost: '', packaging: [], sale_price: '', active: 1 });
 
 const fromProduct = (p: Product): Draft => ({
   id: p.id,
   name: p.name,
   category: p.category,
   labor_cost: String(p.labor_cost),
-  packaging_cost: String(p.packaging_cost),
+  packaging: p.packaging.map((i) => ({ packaging_id: String(i.packaging_id), quantity: String(i.quantity) })),
   sale_price: String(p.sale_price),
   active: p.active
 });
@@ -29,6 +29,7 @@ export default function Products() {
   const [category, setCategory] = useCategory();
   const [products, setProducts] = useState<Product[]>([]);
   const [scents, setScents] = useState<Scent[]>([]);
+  const [packagingList, setPackagingList] = useState<Packaging[]>([]);
   const [productions, setProductions] = useState<Production[]>([]);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState('');
@@ -49,7 +50,17 @@ export default function Products() {
   useEffect(() => {
     load();
     api.get<Scent[]>('/scents').then((s) => setScents(s.filter((x) => x.active)));
+    api.get<Packaging[]>('/packaging').then(setPackagingList);
   }, []);
+
+  // Packaging del producto que se está editando
+  const setPackLine = (i: number, patch: Partial<Draft['packaging'][number]>) =>
+    setDraft({ ...draft!, packaging: draft!.packaging.map((l, idx) => (idx === i ? { ...l, ...patch } : l)) });
+  const packLines = (draft?.packaging ?? []).map((l) => {
+    const item = packagingList.find((x) => x.id === Number(l.packaging_id));
+    return { item, cost: item ? Number(l.quantity || 0) * item.unit_price : 0 };
+  });
+  const draftPackagingCost = packLines.reduce((sum, l) => sum + l.cost, 0);
 
   const save = async () => {
     if (!draft) return;
@@ -58,7 +69,9 @@ export default function Products() {
       name: draft.name,
       category: draft.category,
       labor_cost: Number(draft.labor_cost || 0),
-      packaging_cost: Number(draft.packaging_cost || 0),
+      packaging: draft.packaging
+        .filter((l) => l.packaging_id && Number(l.quantity) > 0)
+        .map((l) => ({ packaging_id: Number(l.packaging_id), quantity: Number(l.quantity) })),
       sale_price: Number(draft.sale_price || 0),
       active: draft.active
     };
@@ -272,19 +285,60 @@ export default function Products() {
               </label>
               <label>Nombre<input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder={CATEGORY_LABELS[draft.category].placeholder} /></label>
               <label>Mano de obra<input type="number" step="any" value={draft.labor_cost} onChange={(e) => setDraft({ ...draft, labor_cost: e.target.value })} /></label>
-              <label>Packaging<input type="number" step="any" value={draft.packaging_cost} onChange={(e) => setDraft({ ...draft, packaging_cost: e.target.value })} /></label>
               <label>Precio de venta<input type="number" step="any" value={draft.sale_price} onChange={(e) => setDraft({ ...draft, sale_price: e.target.value })} /></label>
               <label style={{ flexDirection: 'row', alignItems: 'center', color: 'var(--text)' }}>
                 <input type="checkbox" checked={!!draft.active} onChange={(e) => setDraft({ ...draft, active: e.target.checked ? 1 : 0 })} /> Activo
               </label>
             </div>
+
+            <h3 className="modal-subtitle">Packaging</h3>
+            {packagingList.length ? (
+              <>
+                {draft.packaging.length > 0 && (
+                  <div className="table-wrap">
+                    <table className="pack-lines">
+                      <thead><tr><th>Packaging</th><th>Cantidad</th><th className="num">Costo</th><th /></tr></thead>
+                      <tbody>
+                        {draft.packaging.map((l, i) => (
+                          <tr key={i}>
+                            <td>
+                              <select value={l.packaging_id} onChange={(e) => setPackLine(i, { packaging_id: e.target.value })}>
+                                <option value="">Elegir…</option>
+                                {packagingList.map((pk) => <option key={pk.id} value={pk.id}>{pk.name} ({money(pk.unit_price)} c/u)</option>)}
+                              </select>
+                            </td>
+                            <td><input type="number" min="0" step="any" value={l.quantity} onChange={(e) => setPackLine(i, { quantity: e.target.value })} /></td>
+                            <td className="num">{money(packLines[i].cost)}</td>
+                            <td className="actions">
+                              <button className="small danger" onClick={() => setDraft({ ...draft, packaging: draft.packaging.filter((_, idx) => idx !== i) })}>Quitar</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot><tr><td colSpan={2}>Total packaging</td><td className="num">{money(draftPackagingCost)}</td><td /></tr></tfoot>
+                    </table>
+                  </div>
+                )}
+                <button className="secondary small" style={{ marginTop: '.5rem' }} onClick={() => setDraft({ ...draft, packaging: [...draft.packaging, { packaging_id: '', quantity: '1' }] })}>
+                  + Agregar packaging
+                </button>
+              </>
+            ) : (
+              <p className="muted">Todavía no cargaste packaging. Agregalo en <Link to="/packaging">Packaging</Link> y después elegí cuál lleva este producto.</p>
+            )}
+
             {draft.id && (() => {
               const p = products.find((x) => x.id === draft.id)!;
+              // Vista previa con lo que se está editando (mano de obra y packaging); el margen sale de la configuración
+              const labor = Number(draft.labor_cost || 0);
+              const total = p.supplies_cost + labor + draftPackagingCost + p.fixed_cost;
+              const markup = p.total_cost > 0 ? p.suggested_price / p.total_cost : 1;
+              const suggested = total * markup;
               return (
                 <p className="muted">
-                  Costo actual: insumos {money(p.supplies_cost)} + mano de obra + packaging + fijos {money(p.fixed_cost)} = <strong>{money(p.total_cost)}</strong>.
-                  {' '}Precio sugerido: <strong>{money(p.suggested_price)}</strong>{' '}
-                  <button className="small secondary" onClick={() => setDraft({ ...draft, sale_price: String(Math.round(p.suggested_price)) })}>Usar</button>
+                  Costo: insumos {money(p.supplies_cost)} + mano de obra {money(labor)} + packaging {money(draftPackagingCost)} + fijos {money(p.fixed_cost)} = <strong>{money(total)}</strong>.
+                  {' '}Precio sugerido: <strong>{money(suggested)}</strong>{' '}
+                  <button className="small secondary" onClick={() => setDraft({ ...draft, sale_price: String(Math.round(suggested)) })}>Usar</button>
                 </p>
               );
             })()}
@@ -293,7 +347,7 @@ export default function Products() {
             <div className="toolbar" style={{ marginTop: '1rem', marginBottom: 0 }}>
               <div className="spacer" />
               <button className="secondary" onClick={() => setDraft(null)}>Cancelar</button>
-              <button onClick={save} disabled={!draft.name}>Guardar</button>
+              <button onClick={save} disabled={!draft.name || new Set(draft.packaging.filter((l) => l.packaging_id).map((l) => l.packaging_id)).size !== draft.packaging.filter((l) => l.packaging_id).length}>Guardar</button>
             </div>
           </div>
         </div>
