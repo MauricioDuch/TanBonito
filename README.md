@@ -83,8 +83,8 @@ docs/PLAN.md           alcance, fases y checklist de producción
 Solo hace falta [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
 ```bash
-git clone https://github.com/<tu-usuario>/tan-bonito.git
-cd tan-bonito
+git clone https://github.com/MauricioDuch/TanBonito.git
+cd TanBonito
 docker compose up
 ```
 
